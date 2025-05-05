@@ -1,6 +1,8 @@
+const { getTodosLivros } = require('../servicos/livro');
+
 function getLivros (req, res) {
     try {
-        const livros = []; // Adicionar logica para buscar livros no banco de dados
+        const livros = getTodosLivros();
         res.status(200).json(livros);
     }
     catch (error) {
