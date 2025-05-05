@@ -14,7 +14,9 @@ function getLivro (req, res) {
     const id = req.params.id;
     try {
         const livro = getLivroById(id);
-        if (!livro) {
+        if(!Number(id)) {
+            return res.status(422).json({ error: 'ID deve ser um número' });
+        } else if (!livro) {
             return res.status(404).json({ error: 'Livro não encontrado' });
         }
         res.status(200).json(livro);
@@ -27,6 +29,22 @@ function getLivro (req, res) {
 function postLivro (req, res) {
     try {
         const livro = req.body;
+        
+        // Lista de campos obrigatórios
+        const camposObrigatorios = ['id', 'titulo', 'autor', 'ano_publicacao', 'genero'];
+
+        // Verifica se todos os campos obrigatórios estão presentes e preenchidos
+        const camposFaltando = camposObrigatorios
+            .filter(campo => !livro[campo] || livro[campo].toString().trim() === '');
+        if (camposFaltando.length > 0) {
+            return res.status(400).json({ error: `Os seguintes campos estão faltando ou vazios: ${camposFaltando.join(', ')}` });
+        }
+
+        // Verifica se há campos extras no corpo da requisição
+        const camposExtras = Object.keys(livro).filter(campo => !camposObrigatorios.includes(campo));
+        if (camposExtras.length > 0) {
+            return res.status(400).json({ error: `Os seguintes campos não são permitidos: ${camposExtras.join(', ')}` });
+        }
         insereLivro(livro);
     } catch (error) {
         return res.status(500).json({ error: 'Erro ao salvar livro' });
@@ -39,7 +57,9 @@ function patchLivro (req, res) {
         const livro = req.body;
         const id = req.params.id;
         const livroExistente = getLivroById(id);
-        if (!livroExistente) {
+        if(!Number(id)) {
+            return res.status(422).json({ error: 'ID deve ser um número' });
+        } else if (!livroExistente) {
             return res.status(404).json({ error: 'Livro não encontrado' });
         }
         modificaLivro(livro, id);
@@ -53,7 +73,9 @@ function deleteLivro (req, res) {
     const id = req.params.id;
     try {
         const livro = getLivroById(id);
-        if (!livro) {
+        if(!Number(id)) {
+            return res.status(422).json({ error: 'ID deve ser um número' });
+        } else if (!livro) {
             return res.status(404).json({ error: 'Livro não encontrado' });
         }
         deletaLivro(id);
